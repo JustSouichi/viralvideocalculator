@@ -1,37 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 
-export default function App(){
-
+function ViralityCalculator() {
   const [videoMetrics, setVideoMetrics] = useState({
     views: '',
     likes: '',
     shares: '',
     comments: '',
   });
-  const [weights, setWeights] = useState({
+  const [weights,] = useState({
     views: 0.4,
     likes: 0.3,
     shares: 0.2,
     comments: 0.1,
   });
-  const [viralityThreshold, setViralityThreshold] = useState(100000);
+  const [viralityThreshold,] = useState(100000);
   const [compositeScore, setCompositeScore] = useState(0);
   const [viralityPercentage, setViralityPercentage] = useState(0);
 
+  useEffect(() => {
+    calculateMetrics();
+  }, [videoMetrics]);
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setVideoMetrics((prevMetrics) => ({
+    setVideoMetrics(prevMetrics => ({
       ...prevMetrics,
-      [name]: parseFloat(value) || 0, // Parse input to a float or default to 0 if not a valid number
+      [name]: value,
     }));
   };
 
   const calculateMetrics = () => {
-    const calculatedCompositeScore =
-      videoMetrics.views * weights.views +
-      videoMetrics.likes * weights.likes +
-      videoMetrics.shares * weights.shares +
-      videoMetrics.comments * weights.comments;
+    const values = Object.values(videoMetrics).map(val => val === '' ? 0 : parseFloat(val));
+    const calculatedCompositeScore = 
+      values[0] * weights.views +
+      values[1] * weights.likes +
+      values[2] * weights.shares +
+      values[3] * weights.comments;
     setCompositeScore(calculatedCompositeScore);
 
     const calculatedViralityPercentage =
@@ -39,73 +43,32 @@ export default function App(){
     setViralityPercentage(calculatedViralityPercentage);
   };
 
-  return(
-    <>
-  <div className="flex flex-col items-center">
-    <p className="text-center text-2xl mt-10">
-      TikTok Viral Video Calculator
-    </p>
-    <div class="bg-white rounded-lg shadow-lg p-6 text-center text-2xl mt-10">
-      <h1 class="text-xl font-semibold mb-4">TikTok Viral Video Calculator</h1>
-      <p class="text-gray-600">Put your values here</p>
-      <div>
-        <label>
-          Views:
-          <input
-            type="number"
-            name="views"
-            value={videoMetrics.views}
-            onChange={handleInputChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Likes:
-          <input
-            type="number"
-            name="likes"
-            value={videoMetrics.likes}
-            onChange={handleInputChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Shares:
-          <input
-            type="number"
-            name="shares"
-            value={videoMetrics.shares}
-            onChange={handleInputChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Comments:
-          <input
-            type="number"
-            name="comments"
-            value={videoMetrics.comments}
-            onChange={handleInputChange}
-          />
-        </label>
-      </div>
-      <div>
-        <button onClick={calculateMetrics}>Calculate</button>
-      </div>
-      <div>
-        <p>Composite Score: {compositeScore}</p>
-        <p>Virality Percentage: {viralityPercentage.toFixed(2)}%</p>
-        {viralityPercentage >= 100 ? (
-          <p>This video is likely to go viral on TikTok!</p>
-        ) : (
-          <p>This video may not go viral on TikTok.</p>
-        )}
+  return (
+    <div className="bg-gradient-to-r from-indigo-500 to-purple-500 h-screen flex flex-col justify-center items-center text-white">
+      <h1 className="text-4xl font-semibold mb-6">TikTok Virality Score Calculator</h1>
+      <div className="bg-white bg-opacity-20 rounded-lg p-6 shadow-lg">
+        <p className="text-gray-200 mb-4">Enter Your Video Metrics</p>
+        <div className="space-y-4">
+          {Object.keys(videoMetrics).map(metric => (
+            <input
+              key={metric}
+              className="w-full p-3 text-gray-800 bg-white bg-opacity-20 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
+              type="number"
+              name={metric}
+              placeholder={`${metric.charAt(0).toUpperCase() + metric.slice(1)}`}
+              value={videoMetrics[metric]}
+              onChange={handleInputChange}
+            />
+          ))}
+        </div>
+        <p className="text-xl mt-6">Composite Score: {compositeScore.toFixed(2)}</p>
+        <p className="text-xl">Virality Percentage: {viralityPercentage.toFixed(2)}%</p>
+        <p className={`mt-2 text-lg ${viralityPercentage >= 100 ? 'text-green-400' : 'text-red-400'}`}>
+          {viralityPercentage >= 100 ? 'High chance of going viral!' : 'Less likely to go viral.'}
+        </p>
       </div>
     </div>
-  </div>
-    </>
-  )
+  );
 }
+
+export default ViralityCalculator;
